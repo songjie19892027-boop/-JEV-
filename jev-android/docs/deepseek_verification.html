@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>DeepSeek 判断通道验证报告</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--line:#e3e6ea;--tx:#1c1f23;--mut:#6b7280;
+--ok:#15803d;--okbg:#e8f5ec;--bad:#b91c1c;--badbg:#fdecec;--hi:#b45309}
+*{box-sizing:border-box}
+body{margin:0;padding:28px 20px 60px;background:var(--bg);color:var(--tx);
+font:14px/1.7 -apple-system,"PingFang SC","Helvetica Neue",sans-serif}
+.wrap{max-width:1040px;margin:0 auto}
+h1{font-size:21px;margin:0 0 6px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+padding:18px 20px;margin-bottom:18px}
+h2{font-size:15px;margin:0 0 12px;padding-left:9px;border-left:3px solid #2563eb}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mut);font-weight:600;font-size:12px}
+.bar{display:inline-block;height:8px;border-radius:4px;background:#93c5fd;
+vertical-align:middle;margin-right:6px}
+.pass{color:var(--ok);font-weight:600}
+.fail{color:var(--bad);font-weight:600}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;
+background:var(--okbg);color:var(--ok)}
+.tag.b{background:var(--badbg);color:var(--bad)}
+.note{font-size:12px;color:var(--mut);margin-top:10px}
+.banner{padding:14px 18px;border-radius:9px;font-weight:600;margin-bottom:18px}
+.banner.ok{background:var(--okbg);color:var(--ok)}
+.banner.bad{background:var(--badbg);color:var(--bad)}
+</style></head><body><div class='wrap'>
+<h1>DeepSeek 判断通道验证报告</h1>
+<div class='sub'>验证命题：模型是否真的在读对话，而不是恒定输出某个值。方法是把逻辑相反的场景喂进去，看同一道是非题的概率能否被拉开。</div>
+<div class='banner ok'>全部通过 —— 共 9/9 个场景成功返回</div>
+<div class='card'><h2>表 1 · 各场景的是非题概率</h2><table>
+<tr><th>场景</th><th>has_subtext</th><th>shifting_blame</th><th>shifting_work</th><th>informing_only</th><th>needs_record</th><th>implied_deadline</th></tr>
+<tr><td>[A] 明显在推责</td><td><span class="bar" style="width:63px"></span>90%</td><td><span class="bar" style="width:66px"></span>95%</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:3px"></span>5%</td><td><span class="bar" style="width:59px"></span>85%</td><td><span class="bar" style="width:14px"></span>20%</td></tr>
+<tr><td>[B] 正面表扬</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:63px"></span>90%</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:2px"></span>0%</td></tr>
+<tr><td>[C] 我自己认责</td><td><span class="bar" style="width:21px"></span>30%</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:42px"></span>60%</td><td><span class="bar" style="width:63px"></span>90%</td></tr>
+<tr><td>[D] 完全无关</td><td><span class="bar" style="width:10px"></span>15%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:59px"></span>85%</td><td><span class="bar" style="width:3px"></span>5%</td><td><span class="bar" style="width:2px"></span>0%</td></tr>
+<tr><td>[E] 空对话（只有背景）</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td></tr>
+<tr><td>[1] 纯知会（应当：知会高、派活低）</td><td><span class="bar" style="width:3px"></span>5%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:66px"></span>95%</td><td><span class="bar" style="width:10px"></span>15%</td><td><span class="bar" style="width:2px"></span>0%</td></tr>
+<tr><td>[2] 正常派活（应当：派活中低、无隐含期限）</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:2px"></span>0%</td><td><span class="bar" style="width:42px"></span>60%</td><td><span class="bar" style="width:7px"></span>10%</td></tr>
+<tr><td>[3] 疑似派活·越界（应当：派活高）</td><td><span class="bar" style="width:49px"></span>70%</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:52px"></span>75%</td><td><span class="bar" style="width:3px"></span>5%</td><td><span class="bar" style="width:49px"></span>70%</td><td><span class="bar" style="width:42px"></span>60%</td></tr>
+<tr><td>[4] 疑似甩锅（应当：推责高）</td><td><span class="bar" style="width:63px"></span>90%</td><td><span class="bar" style="width:66px"></span>95%</td><td><span class="bar" style="width:7px"></span>10%</td><td><span class="bar" style="width:3px"></span>5%</td><td><span class="bar" style="width:63px"></span>90%</td><td><span class="bar" style="width:14px"></span>20%</td></tr>
+</table><div class='note'>蓝色条长度表示概率大小。若各行几乎一样长，说明模型没有读输入 —— 这正是旧的本地小模型的症状：range 仅 1.8 个百分点。</div></div>
+<div class='card'><h2>表 2 · 分离度（核心指标）</h2><table>
+<tr><th>题目</th><th>最低</th><th>最高</th><th>range</th><th>判定</th></tr>
+<tr><td>has_subtext</td><td>0.0%</td><td>90.0%</td><td>90.0pt</td><td class='pass'>✅ 拉开了</td></tr>
+<tr><td>shifting_blame</td><td>0.0%</td><td>95.0%</td><td>95.0pt</td><td class='pass'>✅ 拉开了</td></tr>
+<tr><td>shifting_work</td><td>0.0%</td><td>75.0%</td><td>75.0pt</td><td class='pass'>✅ 拉开了</td></tr>
+<tr><td>informing_only</td><td>0.0%</td><td>95.0%</td><td>95.0pt</td><td class='pass'>✅ 拉开了</td></tr>
+<tr><td>needs_record</td><td>0.0%</td><td>90.0%</td><td>90.0pt</td><td class='pass'>✅ 拉开了</td></tr>
+<tr><td>implied_deadline</td><td>0.0%</td><td>90.0%</td><td>90.0pt</td><td class='pass'>✅ 拉开了</td></tr>
+</table><div class='note'>判通过线：range ≥ 25 个百分点。</div></div>
+<div class='card'><h2>表 3 · 期待方向核对</h2><table>
+<tr><th>场景</th><th>题目</th><th>实际</th><th>对照</th><th>判定</th></tr>
+<tr><td>[A] 明显在推责</td><td>shifting_blame</td><td>95%</td><td>他场景最低 0%</td><td class='pass'>✅ 应为偏高</td></tr>
+<tr><td>[B] 正面表扬</td><td>shifting_blame</td><td>0%</td><td>他场景最高 95%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[C] 我自己认责</td><td>shifting_blame</td><td>10%</td><td>他场景最高 95%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[D] 完全无关</td><td>shifting_blame</td><td>0%</td><td>他场景最高 95%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[D] 完全无关</td><td>shifting_work</td><td>0%</td><td>他场景最高 75%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[1] 纯知会（应当：知会高、派活低）</td><td>informing_only</td><td>95%</td><td>他场景最低 0%</td><td class='pass'>✅ 应为偏高</td></tr>
+<tr><td>[1] 纯知会（应当：知会高、派活低）</td><td>shifting_work</td><td>0%</td><td>他场景最高 75%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[2] 正常派活（应当：派活中低、无隐含期限）</td><td>shifting_work</td><td>10%</td><td>他场景最高 75%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[2] 正常派活（应当：派活中低、无隐含期限）</td><td>implied_deadline</td><td>10%</td><td>他场景最高 90%</td><td class='pass'>✅ 应为偏低</td></tr>
+<tr><td>[3] 疑似派活·越界（应当：派活高）</td><td>shifting_work</td><td>75%</td><td>他场景最低 0%</td><td class='pass'>✅ 应为偏高</td></tr>
+<tr><td>[3] 疑似派活·越界（应当：派活高）</td><td>implied_deadline</td><td>60%</td><td>他场景最低 0%</td><td class='pass'>✅ 应为偏高</td></tr>
+<tr><td>[4] 疑似甩锅（应当：推责高）</td><td>shifting_blame</td><td>95%</td><td>他场景最低 0%</td><td class='pass'>✅ 应为偏高</td></tr>
+</table></div>
+<div class='card'><h2>表 4 · 选择项与风险分</h2><table>
+<tr><th>场景</th><th>对方想要</th><th>建议动作</th><th>风险分</th></tr>
+<tr><td>[A] 明显在推责</td><td>shift_blame(75%)</td><td>restate_confirm(40%)</td><td>8</td></tr>
+<tr><td>[B] 正面表扬</td><td>informing(100%)</td><td>accept_normal(90%)</td><td>0</td></tr>
+<tr><td>[C] 我自己认责</td><td>press_speed(90%)</td><td>give_plan(40%)</td><td>2</td></tr>
+<tr><td>[D] 完全无关</td><td>informing(95%)</td><td>private_talk(70%)</td><td>0</td></tr>
+<tr><td>[E] 空对话（只有背景）</td><td>assign_work(0%)</td><td>confirm_scope(0%)</td><td>0</td></tr>
+<tr><td>[1] 纯知会（应当：知会高、派活低）</td><td>informing(100%)</td><td>hold_and_watch(80%)</td><td>0</td></tr>
+<tr><td>[2] 正常派活（应当：派活中低、无隐含期限）</td><td>assign_work(85%)</td><td>accept_normal(40%)</td><td>2</td></tr>
+<tr><td>[3] 疑似派活·越界（应当：派活高）</td><td>assign_work(75%)</td><td>confirm_scope(45%)</td><td>5</td></tr>
+<tr><td>[4] 疑似甩锅（应当：推责高）</td><td>shift_blame(85%)</td><td>restate_confirm(25%)</td><td>8</td></tr>
+</table></div>
+<div class='card'><h2>开销</h2><table>
+<tr><td>输入 tokens</td><td>8,230</td></tr>
+<tr><td>输出 tokens</td><td>1,539</td></tr>
+<tr><td>单次延迟</td><td>936 – 1450 ms （均值 1234 ms）</td></tr>
+</table></div>
+</div></body></html>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>职场版悬浮窗 · 版式预览（实测数据）</title>
+<style>
+:root{
+  --bg:#eef0f3; --page:#f7f8fa; --line:#e3e6ea; --tx:#1c1f23; --mut:#6b7280;
+  --blue:#3A7AFE; --blue-lt:#B9CDEA; --track:#EDF1F6;
+  --red:#DC2626; --amber:#D97706; --green:#16A34A;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:30px 18px 70px;background:var(--page);color:var(--tx);
+  font:14px/1.65 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+.wrap{max-width:1280px;margin:0 auto}
+h1{font-size:23px;margin:0 0 8px}
+.lead{color:var(--mut);font-size:13.5px;max-width:900px;margin-bottom:20px}
+.banner{background:#FAEEDA;border:1px solid #F0D9B0;color:#7A4A0B;
+  border-radius:10px;padding:13px 17px;font-size:13px;margin-bottom:26px}
+.banner b{color:#5C3708}
+.banner.ok{background:#EAF3DE;border-color:#C6E0A8;color:#27500A}
+.banner.ok b{color:#1F3F08}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:22px}
+
+.case{background:#fff;border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden;
+  box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.case-hd{padding:15px 18px 13px;border-bottom:1px solid var(--line);background:#fbfbfc}
+.case-hd .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;
+  border-radius:20px;margin-bottom:8px;letter-spacing:.3px}
+.case-hd h2{font-size:15px;margin:0 0 9px}
+.quote{background:#f1f3f6;border-left:3px solid #c8cfd8;border-radius:0 6px 6px 0;
+  padding:8px 11px;font-size:12.5px;color:#374151;word-break:break-word}
+.hits{margin-top:9px;font-size:12px;color:var(--mut)}
+.hits b{font-weight:700}
+
+/* ---------- 模拟面板（与 OverlayController 渲染顺序、配色一致） ---------- */
+.panel{margin:16px;background:rgba(255,255,255,.94);border:1px solid rgba(0,0,0,.13);
+  border-radius:18px;padding:12px 13px 13px;
+  box-shadow:0 6px 22px rgba(16,24,40,.10)}
+.badge{display:flex;align-items:center;gap:7px;padding-bottom:2px}
+.badge .pill{color:#fff;font-size:13px;font-weight:700;padding:4px 10px;border-radius:20px}
+.badge .word{font-size:13px;font-weight:700}
+.badge .low{color:#B4B2A9;font-size:11.5px;font-weight:400}
+
+.verdict{margin-top:6px;font-size:13.5px;font-weight:700;padding:8px 10px;border-radius:10px}
+.v-risk{color:#791F1F;background:#FCEBEB}
+.v-calm{color:#27500A;background:#EAF3DE}
+
+.rules{margin-top:8px;background:#F3F4F6;border-radius:10px;padding:8px 10px}
+.rules .hd{color:#6B7280;font-size:11.5px;margin-bottom:3px}
+.rules .row{display:flex;gap:6px;padding-top:3px;font-size:12px;align-items:baseline}
+.rules .row .k{font-weight:700;white-space:nowrap}
+.rules .row .v{color:#374151}
+
+.q{margin-top:11px}
+.q .head{display:flex;align-items:center;justify-content:space-between;padding-bottom:3px}
+.q .head .t{color:#111827;font-size:13px;font-weight:700}
+.q .head .nc{color:#B4B2A9;font-size:11.5px}
+.q .rest{color:#9CA3AF;font-size:11.5px;padding-top:3px}
+.prow{padding-top:2px}
+.prow .line{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px}
+.prow .line .lbl{color:#374151}
+.prow.top .line .lbl{color:#111827;font-weight:600}
+.prow .line .pct{font-size:12.5px;font-weight:700}
+.prow.top .line .pct{color:var(--blue)}
+.prow .line .pct:not(.on){color:#9CA3AF}
+.track{height:3px;border-radius:2px;background:var(--track);margin-top:3px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:2px;background:var(--blue-lt)}
+.prow.top .track i{background:var(--blue)}
+
+.notice{margin-top:8px;border-radius:10px;padding:8px 10px;background:#FAEEDA;color:#854F0B}
+.notice .t{font-weight:700;font-size:12.5px}
+.notice .b{font-size:11.5px;color:#7A4A0B;line-height:1.55;margin-top:2px}
+
+hr.sep{border:0;border-top:1px solid #E9ECF0;margin:11px 0 8px}
+.aux{color:#9CA3AF;font-size:11.5px;margin-bottom:8px}
+.rl-head{color:#9CA3AF;font-size:12px;margin-bottom:7px}
+.reply{border:1px solid #E3E6EA;border-radius:10px;padding:9px 11px;margin-bottom:8px;background:#fff}
+.reply .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.reply .rk{font-size:11px;font-weight:700;color:#fff;background:#3A7AFE;border-radius:20px;
+  padding:1px 8px}
+.reply .rk.b{background:#B9CDEA;color:#364B6B}
+.reply .pc{font-size:11.5px;color:#3A7AFE;font-weight:700}
+.reply .pc.g{color:#9CA3AF}
+.reply .tx{font-size:12.5px;color:#1F2937;line-height:1.6}
+.reply .btns{display:flex;gap:8px;margin-top:7px}
+.reply .btns span{font-size:11.5px;color:#2563EB;border:1px solid #CFE0FE;border-radius:6px;
+  padding:2px 10px;background:#F5F9FF}
+.redo{margin-top:2px;text-align:center;font-size:12.5px;color:#2563EB;
+  border:1px dashed #CFE0FE;border-radius:9px;padding:7px;background:#F7FAFF}
+
+/* ---------- 规则表 ---------- */
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+  margin-top:26px}
+.card h2{font-size:15.5px;margin:0 0 4px}
+.card .sub{color:var(--mut);font-size:12.5px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:11.5px}
+td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.k-ASSIGN{color:#854F0B;font-weight:700}
+.k-BLAME{color:#A32D2D;font-weight:700}
+.k-PRESSURE{color:#BA7517;font-weight:700}
+.k-NOTIFY{color:#3B6D11;font-weight:700}
+.zero{color:#15803d;font-weight:700}
+.foot{color:var(--mut);font-size:12px;margin-top:22px;line-height:1.75}
+@media (prefers-color-scheme:dark){
+  body{background:#15171a;color:#e8eaed}
+  :root{--page:#15171a;--line:#2b2f34;--mut:#9aa0a6;--tx:#e8eaed}
+  .case{background:#1c1f23;box-shadow:none}
+  .case-hd{background:#20242a}
+  .quote{background:#24282e;color:#c8cdd3;border-left-color:#3c434b}
+  .panel{background:rgba(28,31,35,.96);border-color:#33383f}
+  .q .head .t{color:#e8eaed}
+  .prow .line .lbl{color:#c8cdd3}
+  .prow.top .line .lbl{color:#fff}
+  .rules{background:#24282e}
+  .rules .row .v{color:#c8cdd3}
+  .track{background:#2f343a}
+  .reply{background:#22262b;border-color:#33383f}
+  .reply .tx{color:#dfe3e7}
+  .reply .btns span{background:#1b2534;color:#8ab4f8;border-color:#2d4363}
+  .redo{background:#1b2534;border-color:#2d4363;color:#8ab4f8}
+  .card{background:#1c1f23}
+  .banner{background:#3a2c10;border-color:#5c4517;color:#f0d9a8}
+  .banner b{color:#ffd98a}
+  th,td{border-bottom-color:#2b2f34}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>职场版悬浮窗 · 版式预览</h1>
+  <p class="lead">
+    面板从上到下的渲染顺序：风险等级 → 一句话结论 → 关键词命中 → 五道是非题 →
+    留痕建议 → 辅助参考 → 候选回复。顺序、配色、字号都照 <code>OverlayController.kt</code> 还原。
+    <br>下图三例的<b>全部概率都是 DeepSeek 实测值</b>（2026-09-23，<code>verify_deepseek.py</code>），不是示意。
+  </p>
+
+  <div class="banner ok">
+    <b>这一页的数字是真实跑出来的。</b>
+    判断与候选回复都走 DeepSeek 官方通道（<code>deepseek-chat</code>），
+    9 个场景 + 3 个起草场景实测：六道是非题的<b>跨场景极差全在 75–95 个百分点</b>，
+    判据是 ≥25 —— 也就是说模型确实在读对话。（作为对照，旧的本地 0.6B 模型极差只有 1.8。）
+    <br>三例的<b>「关键词命中」另有一层本地词表匹配</b>，与模型无关，同样可复现。
+  </div>
+
+  <div class="grid">
+
+    <!-- ============ 例 1 · 纯知会 ============ -->
+    <div class="case">
+      <div class="case-hd">
+        <span class="tag" style="background:#EAF3DE;color:#27500A">应当判为「不用动」</span>
+        <h2>① 纯知会</h2>
+        <div class="quote">领导：同步你一下，下周开始考勤改到钉钉打卡，不用回复。</div>
+        <div class="hits">关键词命中：<span class="k-NOTIFY">像是纯知会</span>
+          <b>同步你一下 · 不用回复</b></div>
+      </div>
+
+      <div class="panel">
+        <div class="badge">
+          <span class="pill" style="background:#16A34A">风险 0 / 10</span>
+          <span class="word" style="color:#16A34A">正常</span>
+        </div>
+
+        <div class="verdict v-calm">只是知会，不用急着回</div>
+
+        <div class="rules">
+          <div class="hd">话术特征（本地规则命中，最可信）</div>
+          <div class="row"><span class="k k-NOTIFY">像是纯知会</span>
+            <span class="v">同步你一下 · 不用回复</span></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">有没有话外之意？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有，就是字面意思</span>
+            <span class="pct on">95%</span></div><div class="track"><i style="width:95%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">有，另有深意</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">是否把责任推给你？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有，就事论事</span>
+            <span class="pct on">100%</span></div><div class="track"><i style="width:100%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">在推，往你身上引</span>
+            <span class="pct">0%</span></div><div class="track"><i style="width:0%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">是否派了本不属于你的活？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有，属正常工作安排</span>
+            <span class="pct on">100%</span></div><div class="track"><i style="width:100%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">在派，超出你的职责</span>
+            <span class="pct">0%</span></div><div class="track"><i style="width:0%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">只是知会，还是要你动？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">只是知会</span>
+            <span class="pct on">95%</span></div><div class="track"><i style="width:95%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">不是，在等你回应</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">有没有隐含时限或催办？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有时间压力</span>
+            <span class="pct on">100%</span></div><div class="track"><i style="width:100%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">有，在催</span>
+            <span class="pct">0%</span></div><div class="track"><i style="width:0%"></i></div></div>
+        </div>
+
+        <!-- needs_record 实测 15%，远低于 60% 门槛 —— 留痕卡不出现，这正是设计意图 -->
+        <hr class="sep">
+        <div class="aux">辅助参考 · 模型在这类多选题上判断力有限，别当结论</div>
+
+        <div class="q" style="margin-top:0">
+          <div class="head"><span class="t">对方想要什么</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">只是知会，不用动</span>
+            <span class="pct on">100%</span></div><div class="track"><i style="width:100%"></i></div></div>
+          <!-- 其余 5 项实测均为 0%，按新规则被滤掉，不再连出空进度条 -->
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">最佳应对</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">先应下，观察动向</span>
+            <span class="pct on">80%</span></div><div class="track"><i style="width:80%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">正常接下并明确时间</span>
+            <span class="pct">15%</span></div><div class="track"><i style="width:15%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">复述一遍请对方确认</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+        </div>
+
+        <hr class="sep">
+        <div class="rl-head">候选回复（按推荐度）</div>
+        <div class="reply">
+          <div class="top"><span class="rk">1</span><span class="pc">95%</span></div>
+          <div class="tx">收到，下周起我按钉钉打卡执行。</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="reply">
+          <div class="top"><span class="rk b">2</span><span class="pc g">70%</span></div>
+          <div class="tx">收到。请教下打卡异常或补卡走哪个流程、找谁确认？</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="reply">
+          <div class="top"><span class="rk b">3</span><span class="pc g">45%</span></div>
+          <div class="tx">好的，知道了。</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="redo">重新分析</div>
+      </div>
+    </div>
+
+    <!-- ============ 例 2 · 疑似派活 ============ -->
+    <div class="case">
+      <div class="case-hd">
+        <span class="tag" style="background:#FAEEDA;color:#854F0B">应当判为「在派活」</span>
+        <h2>② 疑似派活 · 越界</h2>
+        <div class="quote">领导：你比较熟这块，顺手把客服的满意度回访也一起弄了吧，具体你自己把握。</div>
+        <div class="hits">
+          关键词命中：<span class="k-ASSIGN">疑似派活</span> <b>你比较熟 · 顺手把</b>
+          &nbsp;|&nbsp; <span class="k-PRESSURE">暗中施压</span> <b>你自己把握</b>
+        </div>
+      </div>
+
+      <div class="panel">
+        <!-- 风险 5 分、主因取派活（75%）→ 落在 "≥3" 档，措辞应是「归口没说清」
+             而不是「有派活迹象」（那是 ≥6 档）。这正是按主因分档的意义。 -->
+        <div class="badge">
+          <span class="pill" style="background:#D97706">风险 5 / 10</span>
+          <span class="word" style="color:#D97706">归口没说清</span>
+        </div>
+
+        <div class="verdict v-risk">像在派活，先问清归口和资源；话里有深意，别只看字面</div>
+
+        <div class="rules">
+          <div class="hd">话术特征（本地规则命中，最可信）</div>
+          <div class="row"><span class="k k-ASSIGN">疑似派活</span>
+            <span class="v">你比较熟 · 顺手把</span></div>
+          <div class="row"><span class="k k-PRESSURE">暗中施压</span>
+            <span class="v">你自己把握</span></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">有没有话外之意？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">有，另有深意</span>
+            <span class="pct on">70%</span></div><div class="track"><i style="width:70%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">没有，就是字面意思</span>
+            <span class="pct">30%</span></div><div class="track"><i style="width:30%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">是否把责任推给你？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有，就事论事</span>
+            <span class="pct on">90%</span></div><div class="track"><i style="width:90%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">在推，往你身上引</span>
+            <span class="pct">10%</span></div><div class="track"><i style="width:10%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">是否派了本不属于你的活？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">在派，超出你的职责</span>
+            <span class="pct on">75%</span></div><div class="track"><i style="width:75%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">没有，属正常工作安排</span>
+            <span class="pct">25%</span></div><div class="track"><i style="width:25%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">只是知会，还是要你动？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">不是，在等你回应</span>
+            <span class="pct on">95%</span></div><div class="track"><i style="width:95%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">只是知会</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">有没有隐含时限或催办？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">有，在催</span>
+            <span class="pct on">60%</span></div><div class="track"><i style="width:60%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">没有时间压力</span>
+            <span class="pct">40%</span></div><div class="track"><i style="width:40%"></i></div></div>
+        </div>
+
+        <div class="notice">
+          <div class="t">建议留痕 · 把握 70%</div>
+          <div class="b">这条涉及责任、时限或资源，口头说完容易说不清。回完后用文字复述一遍，请对方确认。</div>
+        </div>
+
+        <hr class="sep">
+        <div class="aux">辅助参考 · 模型在这类多选题上判断力有限，别当结论</div>
+
+        <div class="q" style="margin-top:0">
+          <div class="head"><span class="t">对方想要什么</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">要你接一件活</span>
+            <span class="pct on">75%</span></div><div class="track"><i style="width:75%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">要你配合支持</span>
+            <span class="pct">10%</span></div><div class="track"><i style="width:10%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">要你认下责任</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+          <div class="rest">其余 3 项共 10%</div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">最佳应对</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">先确认归口与边界</span>
+            <span class="pct on">50%</span></div><div class="track"><i style="width:50%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">先问清要求再答复</span>
+            <span class="pct">20%</span></div><div class="track"><i style="width:20%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">复述一遍请对方确认</span>
+            <span class="pct">15%</span></div><div class="track"><i style="width:15%"></i></div></div>
+          <div class="rest">其余 4 项共 15%</div>
+        </div>
+
+        <hr class="sep">
+        <div class="rl-head">候选回复（按推荐度）</div>
+        <div class="reply">
+          <div class="top"><span class="rk">1</span><span class="pc">90%</span></div>
+          <div class="tx">好的，我先按现有回访流程梳理一版方案，明天下午发您确认范围和分工。</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="reply">
+          <div class="top"><span class="rk b">2</span><span class="pc g">75%</span></div>
+          <div class="tx">这块我可以配合，想先确认下：回访归客服还是我们这边牵头，需要哪些数据支持？</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="reply">
+          <div class="top"><span class="rk b">3</span><span class="pc g">50%</span></div>
+          <div class="tx">收到，我先了解下情况，稍后跟您对一下具体怎么安排。</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="redo">重新分析</div>
+      </div>
+    </div>
+
+    <!-- ============ 例 3 · 疑似甩锅 ============ -->
+    <div class="case">
+      <div class="case-hd">
+        <span class="tag" style="background:#FCEBEB;color:#791F1F">应当判为「在推责」</span>
+        <h2>③ 疑似甩锅</h2>
+        <div class="quote">领导：这个项目当初是你跟的，现在出了问题是你的责任，你自己跟领导解释。</div>
+        <div class="hits">关键词命中：<span class="k-BLAME">疑似推责</span>
+          <b>出了问题你负责</b></div>
+      </div>
+
+      <div class="panel">
+        <div class="badge">
+          <span class="pill" style="background:#DC2626">风险 8 / 10</span>
+          <span class="word" style="color:#DC2626">很可能背锅</span>
+        </div>
+
+        <div class="verdict v-risk">像在推责任，别口头认下；话里有深意，别只看字面</div>
+
+        <div class="rules">
+          <div class="hd">话术特征（本地规则命中，最可信）</div>
+          <div class="row"><span class="k k-BLAME">疑似推责</span>
+            <span class="v">出了问题你负责</span></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">有没有话外之意？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">有，另有深意</span>
+            <span class="pct on">90%</span></div><div class="track"><i style="width:90%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">没有，就是字面意思</span>
+            <span class="pct">10%</span></div><div class="track"><i style="width:10%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">是否把责任推给你？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">在推，往你身上引</span>
+            <span class="pct on">95%</span></div><div class="track"><i style="width:95%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">没有，就事论事</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">是否派了本不属于你的活？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有，属正常工作安排</span>
+            <span class="pct on">90%</span></div><div class="track"><i style="width:90%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">在派，超出你的职责</span>
+            <span class="pct">10%</span></div><div class="track"><i style="width:10%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">只是知会，还是要你动？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">不是，在等你回应</span>
+            <span class="pct on">95%</span></div><div class="track"><i style="width:95%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">只是知会</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">有没有隐含时限或催办？</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">没有时间压力</span>
+            <span class="pct on">80%</span></div><div class="track"><i style="width:80%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">有，在催</span>
+            <span class="pct">20%</span></div><div class="track"><i style="width:20%"></i></div></div>
+        </div>
+
+        <div class="notice">
+          <div class="t">建议留痕 · 把握 90%</div>
+          <div class="b">这条涉及责任、时限或资源，口头说完容易说不清。回完后用文字复述一遍，请对方确认。</div>
+        </div>
+
+        <hr class="sep">
+        <div class="aux">辅助参考 · 模型在这类多选题上判断力有限，别当结论</div>
+
+        <div class="q" style="margin-top:0">
+          <div class="head"><span class="t">对方想要什么</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">要你认下责任</span>
+            <span class="pct on">80%</span></div><div class="track"><i style="width:80%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">要你接一件活</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">要你配合支持</span>
+            <span class="pct">5%</span></div><div class="track"><i style="width:5%"></i></div></div>
+          <div class="rest">其余 2 项共 10%</div>
+        </div>
+
+        <div class="q">
+          <div class="head"><span class="t">最佳应对</span></div>
+          <div class="prow top"><div class="line"><span class="lbl">复述一遍请对方确认</span>
+            <span class="pct on">30%</span></div><div class="track"><i style="width:30%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">先确认归口与边界</span>
+            <span class="pct">20%</span></div><div class="track"><i style="width:20%"></i></div></div>
+          <div class="prow"><div class="line"><span class="lbl">改线下当面沟通</span>
+            <span class="pct">20%</span></div><div class="track"><i style="width:20%"></i></div></div>
+          <div class="rest">其余 4 项共 30%</div>
+        </div>
+
+        <hr class="sep">
+        <div class="rl-head">候选回复（按推荐度）</div>
+        <div class="reply">
+          <div class="top"><span class="rk">1</span><span class="pc">90%</span></div>
+          <div class="tx">好的，我先把项目过程和时间节点梳理清楚，今天下班前发您确认。</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="reply">
+          <div class="top"><span class="rk b">2</span><span class="pc g">75%</span></div>
+          <div class="tx">明白。想先跟您确认下，这次解释由我主汇报还是配合您？需要哪些材料？</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="reply">
+          <div class="top"><span class="rk b">3</span><span class="pc g">50%</span></div>
+          <div class="tx">收到，我先整理一下情况。</div>
+          <div class="btns"><span>复制</span><span>填入</span></div>
+        </div>
+        <div class="redo">重新分析</div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- ================= 规则表 ================= -->
+  <div class="card">
+    <h2>关键词规则层 · 实测命中（真实可复现）</h2>
+    <div class="sub">
+      这一层不经过模型，是本地词表精确匹配，因此<b>置信度最高、且完全可解释</b>。
+      下表是用 <code>scan()</code> 的实际逻辑跑出来的结果 —— 含一组对照，用于确认它<b>不会乱报</b>。
+    </div>
+    <table>
+      <tr><th style="width:34%">对方的话</th><th style="width:34%">命中</th><th>说明</th></tr>
+      <tr>
+        <td>同步你一下，下周开始考勤改到钉钉打卡，不用回复。</td>
+        <td><span class="k-NOTIFY">像是纯知会</span><br><span class="mono">同步你一下 · 不用回复</span></td>
+        <td>反向信号命中，压住「看什么都有深意」的误报</td>
+      </tr>
+      <tr>
+        <td>明天上午十点开个会，你把上个月的收费数据整理一份带过来。</td>
+        <td class="zero">零命中</td>
+        <td><b>对照组</b>：正常派活用的是中性表述，词表不该报 —— 实测确实没报</td>
+      </tr>
+      <tr>
+        <td>上次说的那个报表你跟一下，我这两天要用。</td>
+        <td><span class="k-ASSIGN">疑似派活</span><br><span class="mono">你跟一下</span><br>
+            <span class="k-PRESSURE">暗中施压</span><br><span class="mono">这两天</span></td>
+        <td>不给资源时限的「跟进」+ 不给日期的催办</td>
+      </tr>
+      <tr>
+        <td>你比较熟这块，顺手把客服的满意度回访也一起弄了吧，具体你自己把握。</td>
+        <td><span class="k-ASSIGN">疑似派活</span><br><span class="mono">你比较熟 · 顺手把</span><br>
+            <span class="k-PRESSURE">暗中施压</span><br><span class="mono">你自己把握</span></td>
+        <td>「比较熟 / 顺手」是把活推过来的典型借口句式</td>
+      </tr>
+      <tr>
+        <td>这块一直是你在跟的，出了问题你负责。</td>
+        <td><span class="k-BLAME">疑似推责</span><br><span class="mono">出了问题你负责</span></td>
+        <td>把因果反过来讲。注意这里<b>只报推责</b>：更短的「你负责」是它的子串，已被包含关系去重</td>
+      </tr>
+    </table>
+  </div>
+
+  <p class="foot">
+    面板顺序说明：<b>风险等级</b>置顶（一眼可见）→ <b>一句话结论</b>（只在单题把握 ≥60% 时才下，
+    避免把摇摆的判断说成结论）→ <b>关键词命中</b>（最可信，排在模型结论之上）→
+    <b>五道是非题</b>（两行都列、按概率降序，免得在脑子里做语义反转而看反）→
+    <b>留痕建议</b>（把握不足 60% 就干脆不出现，免得每次弹一句废话）→
+    <b>辅助参考</b>（多选题判断力有限，必须显著标注）→ <b>候选回复</b>。
+    <br>风险定性<b>按档位 × 主因换措辞</b>：同样「派活」这个主因，≥6 分说「有派活迹象」，
+    3–5 分说「归口没说清」（例②即为这一档）。主因取三题里概率最高的那项，且<b>必须 ≥60% 才敢点名</b>；
+    都在 60% 以下说明判断本身在犹豫，退回中性措辞「需要留意」。平手时按「推责 &gt; 派活 &gt; 深意」取。
+    措辞表在 <code>OverlayController.kt</code> 的 <code>RiskCause</code> 枚举里，四类 × 三档。
+    <br>多选项里实测为 <b>0%</b> 的项会被滤掉（云端分布常呈现「一极全占 + 其余恰好 0」）——
+    否则面板上会连出两三行空进度条，看着像渲染坏了。
+    <br>数据来源：<code>tools/verify_deepseek.py</code>（9 场景 + 3 起草，2026-09-23 实测）。
+    <br>⚠️ <b>这些数字不是固定值</b>：模型带 0.2 的温度，同一句话再跑一次，单题概率会有
+    约 ±10 个百分点的浮动（实测两次跑，例②的「派活」从 85% 到 75%）。
+    <b>方向（哪一题明显偏高）稳定不变，但别去抠具体数字。</b>真正该看的是「哪一题高到 60% 以上」。
+  </p>
+
+</div>
+</body>
+</html>
